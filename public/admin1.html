@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Approve Applications</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .navbar {
+            background-color: #4F0F0F;
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+        }
+        .navbar h1 {
+            margin: 0;
+        }
+        .container {
+            margin: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        table, th, td {
+            border: 1px solid #ccc;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+        }
+        button {
+            background-color: #4F0F0F;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #660000;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+
+</head>
+<body>
+
+    <!-- Navigation bar -->
+    <div class="navbar">
+        <h1>Admin Panel</h1>
+        <button onclick="logout()">Logout</button>
+    </div>
+
+    <div class="container">
+        <h2>Pending Applications for Approval</h2>
+
+        <table id="applicationsTable">
+            <thead>
+                <tr>
+                    <th>Field</th>
+                    <th>Details</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Applicant Name</td>
+                    <td><input type="text" placeholder="Enter Applicant Name"></td>
+                </tr>
+                <tr>
+                    <td>Faculty</td>
+                    <td><input type="text" placeholder="Enter Faculty"></td>
+                </tr>
+                <tr>
+                    <td>Department</td>
+                    <td><input type="text" placeholder="Enter Department"></td>
+                </tr>
+                <tr>
+                    <td>Date of Appointment</td>
+                    <td><input type="date"></td>
+                </tr>
+                <tr>
+                    <td>Type of Promotion</td>
+                    <td><input type="text" placeholder="Enter Type of Promotion"></td>
+                </tr>
+                <tr>
+                    <td>Date Received by AE/Division</td>
+                    <td><input type="date"></td>
+                </tr>
+                <tr>
+                    <td>Date Senate Nominees Requested</td>
+                    <td><input type="date"></td>
+                </tr>
+                <tr>
+                    <td>Date Senate Nominees Received</td>
+                    <td><input type="date"></td>
+                </tr>
+                <tr>
+                    <td>Senate Nominees Sent for Approval</td>
+                    <td><input type="date"></td>
+                </tr>
+                <tr>
+                    <td>Date Senate Approval Received</td>
+                    <td><input type="date"></td>
+                </tr>
+                <tr>
+                    <td>Date Council Members & Selection Committee Requested</td>
+                    <td><input type="date"></td>
+                </tr>
+                <tr>
+                    <td>Date Council Members & Selection Committee Received</td>
+                    <td><input type="date"></td>
+                </tr>
+                <tr>
+                    <td>Remarks</td>
+                    <td><textarea placeholder="Enter Remarks"></textarea></td>
+                </tr>
+                
+            </tbody>
+        </table>
+        
+        <button onclick="saveAsPDF()">Save as PDF</button>
+
+        <!-- Search Input -->
+        <input type="text" id="searchInput" placeholder="Search by Name, Faculty, or Department" onkeyup="searchTable()">
+
+        
+        
+    </div>
+
+    <script>
+        const facultyDepartments = {
+            engineering: [
+                "Department of Civil Engineering",
+                "Department of Computer Engineering",
+                "Department of Engineering Mathematics",
+                "Department of Engineering Management",
+                "Department of Electrical and Electronic Engineering",
+                "Department of Mechanical Engineering",
+                "Department of Chemical and Process Engineering",
+                "Department of Manufacturing & Industrial Engineering"
+            ],
+            agriculture: [
+                "Department of Agricultural Biology",
+                "Department of Agriculture Engineering",
+                "Department of Agriculture Extension",
+                "Department of Crop Science",
+                "Department of Animal Science",
+                "Department of Food Science & Technology",
+                "Department of Soil Science",
+                "Department of Agricultural Economics & Bussiness Management"
+            ],
+            dental: [
+                "Department of Basic Sciences",
+                "Department of Oral Medicine & Periodontology",
+                "Department of Community Dental Health",
+                "Department of Oral & Maxillofacial Surgery",
+                "Department of Oral Pathology",
+                "Department of Prosthetic Dentistry",
+                "Department of Restorative Dentistry"
+            ],
+            allied_health_science: [
+                "Department of Medical Laboratory Science",
+                "Department of Nursing",
+                "Department of Pharmacy"
+            ],
+            science: [
+                "Department of Mathematics",
+                "Department of Chemistry",
+                "Department of Physics",
+                "Department of Botany",
+                "Department of Environmental & Industrial Science",
+                "Department of Molecular Biology & Biotechnology",
+                "Department of Zoology",
+                "Department of Geology",
+                "Department of Statistics & Computer Science"
+            ],
+            medicine: [
+                "Department of Anatomy",
+                "Department of Anaesthesiology & Critical Care",
+                "Department of Biochemistry",
+                "Department of Family Medicine",
+                "Department of Community Medicine",
+                "Department of Forensic Medicine",
+                "Department of Obstetrics & Gynaecology",
+                "Department of Medical Education",
+                "Department of Medicine",
+                "Department of Microbiology",
+                "Department of Paediatrics",
+                "Department of Parasitology",
+                "Department of Pathology",
+                "Department of Pharmacology",
+                "Department of Psychiatry",
+                "Department of Radiology",
+                "Department of Physiology",
+                "Department of Surgery"
+            ],
+            veterinary_medicine: [
+                "Department of Basic Veterinary Sciences",
+                "Department of Public Health & Pharmacology",
+                "Department of Veterinary Pathobiology",
+                "Department of Veterinary Clinical Sciences",
+                "Department of Animal Production and Health"
+            ],
+            management: [
+                "Department of Business Finance",
+                "Department of Management Studies",
+                "Department of Marketing Management",
+                "Department of Operations Management",
+                "Department of Human Resource Management"
+            ],
+            arts: [
+                "Department of History",
+                "Department of Sociology",
+                "Department of English",
+                "Department of Education",
+                "Department of Fine Arts",
+                "Department of Arabic & Islamic Civilization",
+                "Department of Geography",
+                "Department of Law",
+                "Department of Sinhala",
+                "Department of Pali & Uddhist Studies",
+                "Department of Philosophy",
+                "Department of Psychology",
+                "Department of Political Science",
+                "Department of Tamil",
+                "Department of English Language Teaching",
+                "Department of Archaeology",
+                "Department of Classical Languages",
+                "Department of Economics & Statistics",
+                "Department of Information Technology"
+            ]
+        };
+        
+        // Handle Form Submission with JWT
+    document.getElementById('applicationForm').addEventListener('saveEntry()', async function(event) {
+      event.preventDefault();
+
+      const token = localStorage.getItem('token');
+      if (!token) {
+        alert('You must be logged in to submit the application.');
+        window.location.href = 'index.html';
+        return;
+      }
+
+      const formData = new FormData(this);
+
+      try {
+        const response = await fetch('/submit-form', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`
+            // Note: 'Content-Type' is set automatically by the browser when using FormData
+          },
+          body: formData
+        });
+
+        if (response.ok) {
+          alert('Application submitted successfully!');
+          this.reset();
+        } else {
+          const errorText = await response.text();
+          alert(`Error: ${errorText}`);
+        }
+      } catch (error) {
+        console.error('Error submitting form:', error);
+        alert('An error occurred while submitting the form.');
+      }
+    });
+
+        function updateDepartments() {
+            const facultySelect = document.getElementById('faculty');
+            const departmentSelect = document.getElementById('department');
+            const selectedFaculty = facultySelect.value;
+
+            // Clear previous department options
+            departmentSelect.innerHTML = '<option value="">Select a Department...</option>';
+
+            // Populate the department dropdown with relevant options
+            if (facultyDepartments[selectedFaculty]) {
+                facultyDepartments[selectedFaculty].forEach(department => {
+                    const option = document.createElement('option');
+                    option.value = department.toLowerCase().replace(/\s+/g, '_');
+                    option.textContent = department;
+                    departmentSelect.appendChild(option);
+                });
+            }
+        }
+
+       
+
+        // Fetch pending applications from the server
+        document.addEventListener('DOMContentLoaded', function() {
+            fetch('/approval/pending', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => populateApplications(data))
+            .catch(err => console.error('Error fetching applications:', err));
+        });
+
+        // Populate the table with pending applications
+        function populateApplications(applications) {
+            const tableBody = document.getElementById('applicationsTable').querySelector('tbody');
+            tableBody.innerHTML = ''; // Clear existing rows
+            applications.forEach(application => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${application.name}</td>
+                    <td>${application.faculty}</td>
+                    <td>${application.department}</td>
+                    <td>${new Date(application.dateOfAppointment).toLocaleDateString()}</td>
+                    <td>${application.typeOfPromotion || 'N/A'}</td>
+                    <td>${application.dateReceivedByDivision ? new Date(application.dateReceivedByDivision).toLocaleDateString() : 'N/A'}</td>
+                    <td>${application.dateSenateNomineesRequested ? new Date(application.dateSenateNomineesRequested).toLocaleDateString() : 'N/A'}</td>
+                    <td>${application.dateSenateNomineesReceived ? new Date(application.dateSenateNomineesReceived).toLocaleDateString() : 'N/A'}</td>
+                    <td>${application.dateNomineesSentForSenateApproval ? new Date(application.dateNomineesSentForSenateApproval).toLocaleDateString() : 'N/A'}</td>
+                    <td>${application.dateSenateApprovalReceived ? new Date(application.dateSenateApprovalReceived).toLocaleDateString() : 'N/A'}</td>
+                    <td>${application.dateSelectionCommitteeRequested ? new Date(application.dateSelectionCommitteeRequested).toLocaleDateString() : 'N/A'}</td>
+                    <td>${application.dateSelectionCommitteeReceived ? new Date(application.dateSelectionCommitteeReceived).toLocaleDateString() : 'N/A'}</td>
+                    <td>${application.remarks || 'N/A'}</td>
+                    <td>
+                        <button onclick="viewApplication('${application._id}')">View</button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        // Search function to filter the table
+        function searchTable() {
+            const input = document.getElementById('searchInput').value.toLowerCase();
+            const table = document.getElementById('applicationsTable');
+            const rows = table.getElementsByTagName('tr');
+            
+            for (let i = 1; i < rows.length; i++) {
+                const cells = rows[i].getElementsByTagName('td');
+                let match = false;
+                
+                for (let j = 0; j < 3; j++) { // Search only the first three columns (Name, Faculty, Department)
+                    if (cells[j] && cells[j].innerText.toLowerCase().includes(input)) {
+                        match = true;
+                        break;
+                    }
+                }
+                
+                rows[i].style.display = match ? '' : 'none';
+            }
+        }
+        // Save Entry Function
+function saveEntry() {
+    const rowData = {
+        applicantName: document.querySelector('input[placeholder="Enter Applicant Name"]').value,
+        faculty: document.querySelector('input[placeholder="Enter Faculty"]').value,
+        department: document.querySelector('input[placeholder="Enter Department"]').value,
+        dateOfAppointment: document.querySelector('input[type="date"]').value,
+        typeOfPromotion: document.querySelector('input[placeholder="Enter Type of Promotion"]').value,
+        dateReceivedByDivision: document.querySelector('input[type="date"]').value,
+        dateSenateNomineesRequested: document.querySelector('input[type="date"]').value,
+        dateSenateNomineesReceived: document.querySelector('input[type="date"]').value,
+        dateNomineesSentForSenateApproval: document.querySelector('input[type="date"]').value,
+        dateSenateApprovalReceived: document.querySelector('input[type="date"]').value,
+        dateSelectionCommitteeRequested: document.querySelector('input[type="date"]').value,
+        dateSelectionCommitteeReceived: document.querySelector('input[type="date"]').value,
+        remarks: document.querySelector('textarea[placeholder="Enter Remarks"]').value,
+    };
+
+    // Basic Validation
+    if (!rowData.applicantName || !rowData.faculty || !rowData.department) {
+        alert("Please fill in all required fields!");
+        return;
+    }
+
+    // Submit the data
+    fetch('/submit-form', {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(rowData),
+    })
+        .then((response) => response.json())
+        .then((result) => {
+            if (result.success) {
+                alert("Entry saved successfully!");
+                window.location.reload(); // Refresh to show updated data
+            } else {
+                alert("Error saving entry: " + result.message);
+            }
+        })
+        .catch((error) => {
+            console.error("Error saving entry:", error);
+            alert("An error occurred. Please try again.");
+        });
+}
+
+        // View and approve/reject an application
+        function viewApplication(id) {
+            const approvalAction = prompt('Enter your action (approve/reject) and comments if any');
+            if (!approvalAction) return;
+
+            const [action, ...commentsArr] = approvalAction.split(' ');
+            const comments = commentsArr.join(' ') || '';
+
+            fetch(`/approval/${action}/${id}`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ comments })
+            })
+            .then(response => response.json())
+            .then(result => {
+                alert(result.message);
+                window.location.reload(); // Reload the page to refresh the list of pending applications
+            })
+            .catch(err => console.error('Error performing action:', err));
+        }
+
+        // Logout function
+        function logout() {
+            localStorage.removeItem('token');
+            window.location.href = '/login.html';
+        }
+    </script>
+<script>
+    async function saveAsPDF() {
+        const applicantName = document.querySelector('input[placeholder="Enter Applicant Name"]').value.trim();
+        const faculty = document.querySelector('input[placeholder="Enter Faculty"]').value.trim();
+        const department = document.querySelector('input[placeholder="Enter Department"]').value.trim();
+        const dateOfAppointment = document.querySelector('input[type="date"]').value;
+        const typeOfPromotion = document.querySelector('input[placeholder="Enter Type of Promotion"]').value.trim();
+        const dateReceivedByDivision = document.querySelector('input[type="date"]').value;
+        const dateSenateNomineesRequested = document.querySelector('input[type="date"]').value;
+        const dateSenateNomineesReceived = document.querySelector('input[type="date"]').value;
+        const dateNomineesSentForSenateApproval = document.querySelector('input[type="date"]').value;
+        const dateSenateApprovalReceived= document.querySelector('input[type="date"]').value;
+        const dateSelectionCommitteeRequested= document.querySelector('input[type="date"]').value;
+        const dateSelectionCommitteeReceived= document.querySelector('input[type="date"]').value;
+        const remarks = document.querySelector('textarea[placeholder="Enter Remarks"]').value.trim();
+
+        // Validate that the applicant's name exists
+        if (!applicantName) {
+            alert("Please enter the applicant's name before exporting!");
+            return;
+        }
+
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+
+        // Add content to the PDF
+        doc.setFontSize(16);
+        doc.text("Application Details", 10, 10);
+        doc.setFontSize(12);
+
+        doc.text(`Applicant Name: ${applicantName}`, 10, 20);
+        doc.text(`Faculty: ${faculty}`, 10, 30);
+        doc.text(`Department: ${department}`, 10, 40);
+        doc.text(`Date of Appointment: ${dateOfAppointment}`, 10, 50);
+        doc.text(`Type of Promotion: ${typeOfPromotion}`, 10, 60);
+        doc.text(`Date Received by AE/Division: ${dateReceivedByDivision}`, 10, 70);
+        doc.text(`Date Senate Nominees Requested: ${dateSenateNomineesRequested}`, 10, 80);
+        doc.text(`Date Senate Nominees Received: ${dateSenateNomineesReceived}`, 10, 90);
+        doc.text(`Senate Nominees Sent for Approval: ${dateNomineesSentForSenateApproval}`, 10, 100);
+        doc.text(`Date Senate Approval Received: ${dateSenateApprovalReceived}`, 10, 110);
+        doc.text(`Date Council Members & Selection Committee Requested: ${dateSelectionCommitteeRequested}`, 10, 120);
+        doc.text(`Date Council Members & Selection Committee Received: ${dateSelectionCommitteeReceived}`, 10, 130);
+        doc.text("Remarks:", 10, 1400);
+        doc.text(remarks, 10, 150, { maxWidth: 180 });
+
+        // Save the file locally with the applicant's name
+        const fileName = `${applicantName.replace(/\s+/g, "_")}_application.pdf`;
+            doc.save(fileName);
+
+            // Add the new application to the table
+            const newApplication = {
+                name: applicantName,
+                faculty,
+                department,
+                pdf: fileName
+            };
+            applications.push(newApplication);
+            localStorage.setItem('applications', JSON.stringify(applications));
+            populateTable();
+
+            const pdfBlob = doc.output('blob');
+
+// Create FormData and send it to the backend
+const formData = new FormData();
+formData.append('file', pdfBlob, `${applicantName}_application.pdf`);
+
+try {
+    const response = await fetch('/upload', {
+        method: 'POST',
+        body: formData,
+    });
+
+    if (response.ok) {
+        const result = await response.json();
+        alert(`File uploaded: ${result.file.filename}`);
+    } else {
+        alert('Failed to upload the PDF.');
+    }
+} catch (error) {
+    console.error('Error uploading PDF:', error);
+}
+
+        }
+
+        // Convert PDF to base64 format
+    const pdfData = doc.output('datauristring');
+
+// Now send this PDF data to the server (Node.js backend)
+fetch('/save-pdf', {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ pdfData })
+})
+.then(response => response.json())
+.then(result => {
+    alert("PDF saved successfully!");
+})
+.catch(error => {
+    console.error('Error:', error);
+    alert('Failed to save PDF.');
+});
+
+        // Populate the table dynamically
+        function populateTable() {
+            const tableBody = document.getElementById('applicationsTableBody');
+            tableBody.innerHTML = '';
+
+            applications.forEach((app) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${app.name}</td>
+                    <td>${app.faculty}</td>
+                    <td>${app.department}</td>
+                    <td><a href="${app.pdf}" download>Download PDF</a></td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        // Initialize table on page load
+        document.addEventListener('DOMContentLoaded', populateTable);
+
+    
+</script>
+
+</body>
+</html>

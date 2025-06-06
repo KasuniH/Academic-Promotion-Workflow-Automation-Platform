@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, ingoditial-scale=1">
+
+<title>Applicant Form</title>
+<style>
+body {font-family: Arial, Helvetica, sans-serif;}
+* {box-sizing: border-box;}
+
+input[type=text], select, textarea, input[type=date] {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+  margin-top: 6px;
+  margin-bottom: 16px;
+  resize: vertical;
+}
+
+input[type=submit], button {
+  background-color: #4F0F0F;
+  color: white;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+input[type=submit]:hover, button:hover {
+  background-color: #660000;
+}
+
+.container {
+  border-radius: 5px;
+  background-color: #f2f2f2;
+  padding: 20px;
+}
+
+/* Navigation bar styling */
+.navbar {
+  background-color: #7A0000; /* Dark red color */
+  overflow: hidden;
+  padding: 10px 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.navbar img {
+  width: 150px; /* Adjust the size of the logo */
+}
+
+.navbar .login-button {
+  background-color: #4F0F0F; /* Slightly darker button */
+  color: white;
+  padding: 10px 20px;
+  text-align: center;
+  text-decoration: none;
+  border-radius: 5px;
+  margin-right: 20px;
+  transition: background-color 0.3s;
+}
+
+.navbar .login-button:hover {
+  background-color: #660000; /* Hover color for the button */
+}
+
+.form-group {
+  margin-bottom: 20px; /* Adjust the space as needed */
+}
+
+table, th, td {
+  border: 1px solid #ccc;
+  border-collapse: collapse;
+}
+
+th, td {
+  padding: 8px;
+  text-align: left;
+}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+
+</head>
+<body>
+  <!-- Navigation bar -->
+  <div class="navbar">
+    <img src="img/uop.png" alt="University Logo">
+    <a href="index.html" class="login-button">Logout</a>
+  </div>
+
+  <h3>APPLICATION FOR CONFIRMATION/NORMAL PROMOTION TO THE GRADE OF SENIOR LECTURER GRADE II/ SENIOR LECTURER GRADE I</h3>
+
+  <div class="container">
+    <form id="applicationForm" enctype="multipart/form-data">
+      <!-- 1. Name -->
+      <label for="fname">1. Name:</label>
+      <input type="text" id="fname" name="name" placeholder="Your name.." required>
+
+      <!-- 2. Date of Appointment -->
+      <div class="form-group">
+        <label for="dob">2. Date of Appointment:</label>
+        <input type="date" id="dob" name="dateOfAppointment" required>
+      </div>
+
+      <!-- 3. Faculty and Department -->
+      <label for="faculty">3. Faculty:</label>
+      <select id="faculty" name="faculty" onchange="updateDepartments()" required>
+        <option value="">Select a Faculty...</option>
+        <option value="engineering">Faculty of Engineering</option>
+        <option value="agriculture">Faculty of Agriculture</option>
+        <option value="dental">Faculty of Dental Sciences</option>
+        <option value="allied_health_science">Faculty of Allied Health Science</option>
+        <option value="science">Faculty of Science</option>
+        <option value="medicine">Faculty of Medicine</option>
+        <option value="veterinary_medicine">Faculty of Veterinary Medicine & Animal Sciences</option>
+        <option value="management">Faculty of Management</option>
+        <option value="arts">Faculty of Arts</option>
+      </select>
+
+      <label for="department">Department:</label>
+      <select id="department" name="department" required>
+        <option value="">Select a Department...</option>
+      </select>
+
+      <!-- 4. Period of Study -->
+      <div class="form-group">
+        <label for="period_of_study">4. Period of Study (Only practitioners who qualify for promotion need to fill this section):</label>
+        <div>
+          <label for="full_pay_from">Full Pay - From:</label>
+          <input type="date" id="full_pay_from" name="periodOfStudyfullPayFrom">
+          <label for="full_pay_to">To:</label>
+          <input type="date" id="full_pay_to" name="periodOfStudyfullPayTo">
+        </div>
+        <br>
+        <div>
+          <label for="no_pay_from">No Pay - From:</label>
+          <input type="date" id="no_pay_from" name="periodOfStudynoPayFrom">
+          <label for="no_pay_to">To:</label>
+          <input type="date" id="no_pay_to" name="periodOfStudynoPayTo">
+        </div>
+      </div>
+
+      <!-- 5. Academic Qualifications -->
+      <label for="qualifications">5. Academic Qualifications:</label>
+      
+      <h4>(a) First Degree:</h4>
+      <table id="academic-qualifications-table" style="width: 100%;">
+        <thead>
+          <tr>
+            <th>University</th>
+            <th>Period of Registration (From - To)</th>
+            <th>Degree Obtained</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><input type="text" name="academicQualificationsuniversity" placeholder="Enter University" required></td>
+            <td>
+              <input type="date" name="academicQualificationsregistrationFrom" placeholder="From" required>
+              <input type="date" name="academicQualificationsregistrationTo" placeholder="To" required>
+            </td>
+            <td><input type="text" name="academicQualificationsdegreeObtained" placeholder="Enter Degree" required></td>
+          </tr>
+        </tbody>
+      </table>
+      <br>
+      <button type="button" onclick="addAcademicQualificationRow()">Add More Academic Qualifications</button>
+
+      <h4>(b) Postgraduate Degree/Diploma Obtained:</h4>
+      <table id="postgraduate-degrees-table" style="width: 100%;">
+        <thead>
+          <tr>
+            <th>University</th>
+            <th>Period of Registration (From - To)</th>
+            <th>Full time or Part time</th>
+            <th>Degree Obtained</th>
+            <th>Title of Thesis/Dissertation</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><input type="text" name="postgraduateDegreesuniversity" placeholder="Enter University"></td>
+            <td>
+              <input type="date" name="postgraduateDegreesregistrationFrom" placeholder="From">
+              <input type="date" name="postgraduateDegreesregistrationTo" placeholder="To">
+            </td>
+            <td>
+              <select name="postgraduateDegreesfullOrPartTime">
+                <option value="">Select</option>
+                <option value="full_time">Full time</option>
+                <option value="part_time">Part time</option>
+              </select>
+            </td>
+            <td><input type="text" name="postgraduateDegreesdegreeObtained" placeholder="Enter Degree"></td>
+            <td><input type="text" name="postgraduateDegreesthesisTitle" placeholder="Enter Thesis/Dissertation Title"></td>
+          </tr>
+        </tbody>
+      </table>
+      <br>
+      <button type="button" onclick="addPostgraduateDegreeRow()">Add More Postgraduate Degrees</button>
+
+      <!-- 6. University Teaching Appointments -->
+      <h4>6. University Teaching Appointments:</h4>
+      <table id="teaching-appointments-table" style="width: 100%;">
+        <thead>
+          <tr>
+            <th>Post</th>
+            <th>Period of Appointment (From - To)</th>
+            <th>Institution</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><input type="text" name="teachingAppointmentspost" placeholder="Enter Post" required></td>
+            <td>
+              <input type="date" name="teachingAppointmentsappointmentFrom" placeholder="From" required>
+              <input type="date" name="teachingAppointmentsappointmentTo" placeholder="To" required>
+            </td>
+            <td><input type="text" name="teachingAppointmentsinstitution" placeholder="Enter Institution" required></td>
+          </tr>
+        </tbody>
+      </table>
+      <br>
+      <button type="button" onclick="addTeachingAppointmentRow()">Add More Teaching Appointments</button>
+
+      <!-- 7. Confirmation -->
+      <div class="form-group">
+        <label>7. Have you been confirmed in your appointment? (Yes/No)</label><br>
+        <input type="radio" id="confirm_yes" name="confirmation" value="yes" required>
+        <label for="confirm_yes">Yes</label>
+        <input type="radio" id="confirm_yes" name="confirmation" value="no">
+        <label for="confirm_no">No</label>
+      </div>
+
+      <!-- Reference to Confirmation Letter -->
+      <div class="form-group">
+        <label for="confirmation_letter">If yes, please give reference to the letter of confirmation:</label>
+        <input type="text" id="confirmation_letter" name="confirmationLetter" placeholder="Reference to confirmation letter..">
+      </div>
+
+      <!-- 8. Present Salary -->
+      <div class="form-group">
+        <label for="present_salary">8. Present Salary:</label>
+        <input type="text" id="present_salary" name="presentSalary" placeholder="Enter your present salary.." required>
+      </div>
+
+      <div class="form-group">
+        <label for="salary_max_date">If on the maximum, state the date on which the maximum of the salary scale was reached:</label>
+        <input type="date" id="salary_max_date" name="salaryMaxDate">
+      </div>
+
+      <!-- 9. Research Publications -->
+      <div class="form-group">
+        <label for="research_publications">9. Research Publications or Other Acceptable Evidence of Research:</label>
+        <p>List of research publications, copies of such publications, and a copy of the Thesis/Dissertation enclosed.</p>
+        <textarea id="research_publications" name="researchPublications" rows="4" placeholder="Enter your research publications.."></textarea>
+      </div>
+
+      <!-- File Uploads -->
+      <div class="form-group">
+        <label for="pdf1">Upload Your PhD Certificate (PDF):</label>
+        <input type="file" id="pdf1" name="pdf1" accept=".pdf" required>
+      </div>
+
+      <div class="form-group">
+        <label for="pdf2">Upload Your Teaching Methodology (PDF):</label>
+        <input type="file" id="pdf2" name="pdf2" accept=".pdf" required>
+      </div>
+
+      <!-- Signature -->
+      <div class="form-group" style="text-align: right;">
+        <p>Yours faithfully,</p>
+        <div>
+          <input type="text" id="signature" name="signature" placeholder="Enter your signature.." style="width: 200px;" required>
+          <label for="signature">Signature of Applicant</label>
+        </div>
+      </div>
+
+      <hr> <!-- Horizontal line -->
+
+      <!-- 10. Observations of the Head of Department -->
+      <div class="form-group">
+        <label for="hod_observations">10. Observations of the Head of Department:</label>
+        <textarea id="hod_observations" name="hodObservations.observations" rows="4" placeholder="Enter observations here..."></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="hod_observations_date">Date:</label>
+        <input type="date" id="hod_observations_date" name="hodObservations.date">
+      </div>
+
+      <div class="form-group">
+        <label for="hod_signature">Signature:</label>
+        <input type="text" id="hod_signature" name="hodObservations.signature" placeholder="Enter signature.." style="width: 200px;">
+      </div>
+
+      <!-- 11. Observations of the Dean of the Faculty -->
+      <div class="form-group">
+        <label for="dean_observations">11. Observations of the Dean of the Faculty:</label>
+        <textarea id="dean_observations" name="deanObservations.observations" rows="4" placeholder="Enter observations here..."></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="dean_observations_date">Date:</label>
+        <input type="date" id="dean_observations_date" name="deanObservations.date">
+      </div>
+
+      <div class="form-group">
+        <label for="dean_signature">Signature:</label>
+        <input type="text" id="dean_signature" name="deanObservations.signature" placeholder="Enter signature.." style="width: 200px;">
+      </div>
+
+      <input type="submit" value="Submit">
+    </form>
+  </div>
+
+  <script>
+    // Check if user is authenticated
+    document.addEventListener('DOMContentLoaded', function() {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        window.location.href = 'index.html';
+      }
+    });
+
+    // Function to dynamically add more rows for academic qualifications
+    function addAcademicQualificationRow() {
+      const table = document.getElementById("academic-qualifications-table").getElementsByTagName("tbody")[0];
+      const newRow = table.insertRow();
+
+      const universityCell = newRow.insertCell(0);
+      const periodCell = newRow.insertCell(1);
+      const degreeCell = newRow.insertCell(2);
+
+      universityCell.innerHTML = '<input type="text" name="academicQualifications.university[]" placeholder="Enter University" required>';
+      periodCell.innerHTML = '<input type="date" name="academicQualifications.registrationFrom[]" placeholder="From" required> ' +
+                             '<input type="date" name="academicQualifications.registrationTo[]" placeholder="To" required>';
+      degreeCell.innerHTML = '<input type="text" name="academicQualifications.degreeObtained[]" placeholder="Enter Degree" required>';
+    }
+
+    // Function to dynamically add more rows for postgraduate degrees
+    function addPostgraduateDegreeRow() {
+      const table = document.getElementById("postgraduate-degrees-table").getElementsByTagName("tbody")[0];
+      const newRow = table.insertRow();
+
+      const universityCell = newRow.insertCell(0);
+      const periodCell = newRow.insertCell(1);
+      const fullPartCell = newRow.insertCell(2);
+      const degreeCell = newRow.insertCell(3);
+      const thesisCell = newRow.insertCell(4);
+
+      universityCell.innerHTML = '<input type="text" name="postgraduateDegrees.university[]" placeholder="Enter University">';
+      periodCell.innerHTML = '<input type="date" name="postgraduateDegrees.registrationFrom[]" placeholder="From"> ' +
+                             '<input type="date" name="postgraduateDegrees.registrationTo[]" placeholder="To">';
+      fullPartCell.innerHTML = '<select name="postgraduateDegrees.fullOrPartTime[]">' +
+                                '<option value="">Select</option>' +
+                                '<option value="full_time">Full time</option>' +
+                                '<option value="part_time">Part time</option>' +
+                                '</select>';
+      degreeCell.innerHTML = '<input type="text" name="postgraduateDegrees.degreeObtained[]" placeholder="Enter Degree">';
+      thesisCell.innerHTML = '<input type="text" name="postgraduateDegrees.thesisTitle[]" placeholder="Enter Thesis/Dissertation Title">';
+    }
+
+    // Function to dynamically add more rows for teaching appointments
+    function addTeachingAppointmentRow() {
+      const table = document.getElementById("teaching-appointments-table").getElementsByTagName("tbody")[0];
+      const newRow = table.insertRow();
+
+      const postCell = newRow.insertCell(0);
+      const periodCell = newRow.insertCell(1);
+      const institutionCell = newRow.insertCell(2);
+
+      postCell.innerHTML = '<input type="text" name="teachingAppointments.post[]" placeholder="Enter Post" required>';
+      periodCell.innerHTML = '<input type="date" name="teachingAppointments.appointmentFrom[]" placeholder="From" required> ' +
+                             '<input type="date" name="teachingAppointments.appointmentTo[]" placeholder="To" required>';
+      institutionCell.innerHTML = '<input type="text" name="teachingAppointments.institution[]" placeholder="Enter Institution" required>';
+    }
+
+    // Function to update the department dropdown based on the selected faculty
+    const facultyDepartments = {
+      engineering: [
+        
+    "Department of Civil Engineering",
+    "Department of Computer Engineering",
+    "Department of Engineering Mathematics",
+    "Department of Engineering Management",
+    "Department of Electrical and Electronic Engineering",
+    "Department of Mechanical Engineering",
+    "Department of Chemical and Process Engineering",
+    "Department of Manufacturing & Industrial Engineering"
+      ],
+      agriculture: [
+        "Department of Agricultural Biology",
+        "Department of Agriculture Engineering",
+        "Department of Agriculture Extension",
+        "Department of Crop Science",
+        "Department of Animal Science",
+        "Department of Food Science & Technology",
+        "Department of Soil Science",
+        "Department of Agricultural Economics & Bussiness Management",
+      ],
+      dental: [
+    "Department of Basic Sciences",
+    "Department of Oral Medicine & Periodontology",
+    "Department of Community Dental Health",
+    "Department of Oral & Maxillofacial Surgery",
+    "Department of Oral Pathology",
+    "Department of Prosthetic Dentistry",
+    "Department of Restorative Dentistry"
+      ],
+      allied_health_science: [
+        "Department of Medical Laboratory Science",
+        "Department of Nursing",
+        "Department of Pharmacy",
+      ],
+      science: [
+    "Department of Mathematics",
+    "Department of Chemistry",
+    "Department of Physics",
+    "Department of Botany",
+    "Department of Environmental & Industrial Science",
+    "Department of Molecular Biology & Biotechnology",
+    "Department of Zoology",
+    "Department of Geology",
+    "Department of Statistics & Computer Science"
+      ],
+      medicine: [
+        
+    "Department of Anatomy",
+    "Department of Anaesthesiology & Critical Care",
+    "Department of Biochemistry",
+    "Department of Family Medicine",
+    "Department of Community Medicine",
+    "Department of Forensic Medicine",
+    "Department of Obstetrics & Gynaecology",
+    "Department of Medical Education",
+    "Department of Medicine",
+    "Department of Microbiology",
+    "Department of Paediatrics",
+    "Department of Parasitology",
+    "Department of Pathology",
+    "Department of Pharmacology",
+    "Department of Psychiatry",
+    "Department of Radiology",
+    "Department of Physiology",
+    "Department of Surgery"
+      ],
+      veterinary_medicine: [
+    "Department of Basic Veterinary Sciences",
+    "Department of Public Health & Pharmacology",
+    "Department of Veterinary Pathobiology",
+    "Department of Veterinary Clinical Sciences",
+    "Department of Animal Production and Health"
+      ],
+      management: [
+    "Department of Business Finance",
+    "Department of Management Studies",
+    "Department of Marketing Management",
+    "Department of Operations Management",
+    "Department of Human Resource Management"
+        
+      ],
+      arts: [
+    "Department of History",
+    "Department of Sociology",
+    "Department of English",
+    "Department of Education",
+    "Department of Fine Arts",
+    "Department of Arabic & Islamic Civilization",
+    "Department of Geography",
+    "Department of Law",
+    "Department of Sinhala",
+    "Department of Pali & Uddhist Studies",
+    "Department of Philosophy",
+    "Department of Psychology",
+    "Department of Political Science",
+    "Department of Tamil",
+    "Department of English Language Teaching",
+    "Department of Archaeology",
+    "Department of Classical Languages",
+    "Department of Economics & Statistics",
+    "Department of Information Technology"],
+    };
+
+    function updateDepartments() {
+      const facultySelect = document.getElementById('faculty');
+      const departmentSelect = document.getElementById('department');
+      const selectedFaculty = facultySelect.value;
+
+      // Clear previous department options
+      departmentSelect.innerHTML = '<option value="">Select a Department...</option>';
+
+      // Populate the department dropdown with relevant options
+      if (facultyDepartments[selectedFaculty]) {
+        facultyDepartments[selectedFaculty].forEach(department => {
+          const option = document.createElement('option');
+          option.value = department.toLowerCase().replace(/\s+/g, '_');
+          option.textContent = department;
+          departmentSelect.appendChild(option);
+        });
+      }
+    }
+
+    // Handle Form Submission with JWT
+    document.getElementById('applicationForm').addEventListener('submit', async function(event) {
+      event.preventDefault();
+
+      const token = localStorage.getItem('token');
+      if (!token) {
+        alert('You must be logged in to submit the application.');
+        window.location.href = 'index.html';
+        return;
+      }
+
+      const formData = new FormData(this);
+
+      try {
+        const response = await fetch('/submit-form', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`
+            // Note: 'Content-Type' is set automatically by the browser when using FormData
+          },
+          body: formData
+        });
+
+        if (response.ok) {
+          alert('Application submitted successfully!');
+          this.reset();
+        } else {
+          const errorText = await response.text();
+          alert(`Error: ${errorText}`);
+        }
+      } catch (error) {
+        console.error('Error submitting form:', error);
+        alert('An error occurred while submitting the form.');
+      }
+    });
+  </script>
+   
+  <script>
+    document.getElementById('applicationForm').addEventListener('submit', function (e) {
+      e.preventDefault(); // Prevent the default form submission
+
+      // Get form data
+      const name = document.getElementById('fname').value;
+      const dateOfAppointment = document.getElementById('dob').value;
+      const faculty = document.getElementById('faculty').value;
+      const department= document.getElementById('department').value;
+      const periodOfStudyfullPayFrom = document.getElementById('full_pay_from').value;
+      const periodOfStudyfullPayTo = document.getElementById('full_pay_to').value;
+      const periodOfStudynoPayFrom = document.getElementById('no_pay_from').value;
+      const periodOfStudynoPayTo = document.getElementById('no_pay_from').value;
+      const academicQualificationsuniversity = document.getElementById('academic-qualifications-table').value;
+      const academicQualificationsregistrationFrom = document.getElementById('academic-qualifications-table').value;
+      const academicQualificationsregistrationTo = document.getElementById('academic-qualifications-table').value;
+      const academicQualificationsdegreeObtained = document.getElementById('academic-qualifications-table').value;
+      const postgraduateDegreesuniversity = document.getElementById('postgraduate-degrees-table').value;
+      const postgraduateDegreesregistrationFrom = document.getElementById('postgraduate-degrees-table').value;
+      const postgraduateDegreesregistrationTo = document.getElementById('postgraduate-degrees-table').value;
+      const postgraduateDegreesfullOrPartTime = document.getElementById('postgraduate-degrees-table').value;
+      const postgraduateDegreesdegreeObtained = document.getElementById('postgraduate-degrees-table').value;
+      const postgraduateDegreesthesisTitle = document.getElementById('postgraduate-degrees-table').value;
+      const teachingAppointmentspost = document.getElementById('teaching-appointments-table').value;
+      const teachingAppointmentsappointmentFrom = document.getElementById('teaching-appointments-table').value;
+      const teachingAppointmentsappointmentTo = document.getElementById('teaching-appointments-table').value;
+      const teachingAppointmentsinstitution = document.getElementById('teaching-appointments-table').value;
+      const confirmation = document.getElementById('confirm_yes').value;
+      const confirmationLetter = document.getElementById('confirmation_letter').value;
+      const  presentSalary= document.getElementById('present_salary').value;
+      const  salaryMaxDate= document.getElementById('salary_max_date').value;
+      const  researchPublications= document.getElementById('research_publications').value;
+        // New: Get Period of Study dates
+   
+    
+      // Create a PDF document
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+
+      
+
+      
+    });
+  </script>
+  <script>
+    // API to generate filled PDF
+    app.get('/generate-pdf/:id', async (req, res) => {
+        try {
+            const applicant = await Applicant.findById(req.params.id);
+            if (!applicant) return res.status(404).send('Applicant not found');
+    
+            // Load the uploaded PDF template
+            const templatePath = './uploads/template.pdf';
+            const pdfBytes = fs.readFileSync(templatePath);
+            const pdfDoc = await PDFDocument.load(pdfBytes);
+    
+            // Embed a standard font
+            const font = await pdfDoc.embedFont(PDFDocument.PDFFont.Helvetica);
+    
+            // Get the first page of the PDF
+            const pages = pdfDoc.getPages();
+            const firstPage = pages[0];
+    
+            // Set text positions and content
+            firstPage.drawText(applicant.name || '', {
+                x: 100,
+                y: 700,
+                size: 12,
+                font,
+                color: rgb(0, 0, 0),
+            });
+    
+            firstPage.drawText(applicant.dateOfAppointment || '', {
+                x: 100,
+                y: 650,
+                size: 12,
+                font,
+                color: rgb(0, 0, 0),
+            });
+    
+            firstPage.drawText(applicant.faculty || '', {
+                x: 100,
+                y: 600,
+                size: 12,
+                font,
+                color: rgb(0, 0, 0),
+            });
+    
+            firstPage.drawText(applicant.department || '', {
+                x: 100,
+                y: 550,
+                size: 12,
+                font,
+                color: rgb(0, 0, 0),
+            });
+    
+            firstPage.drawText(applicant.presentSalary || '', {
+                x: 100,
+                y: 500,
+                size: 12,
+                font,
+                color: rgb(0, 0, 0),
+            });
+    
+            // More fields can be added similarly...
+    
+            // Save the updated PDF
+            const pdfOutput = await pdfDoc.save();
+            const outputPath = `./output/${applicant.name}_Application.pdf`;
+            fs.writeFileSync(outputPath, pdfOutput);
+    
+            // Send the file as a response
+            res.download(outputPath);
+        } catch (err) {
+            console.error(err);
+            res.status(500).send('Error generating PDF');
+        }
+    });
+   </script>
+  <script>
+    // Function to save form data to localStorage
+    function autoSaveForm() {
+      const formData = new FormData(document.getElementById('applicationForm'));
+      const formObject = {};
+      formData.forEach((value, key) => {
+        formObject[key] = value;
+      });
+
+      localStorage.setItem('applicationFormData', JSON.stringify(formObject));
+    }
+
+    // Function to load saved form data from localStorage
+    function loadSavedForm() {
+      const savedData = localStorage.getItem('applicationFormData');
+      if (savedData) {
+        const formObject = JSON.parse(savedData);
+        for (const [key, value] of Object.entries(formObject)) {
+          const element = document.querySelector(`[name="${key}"], [id="${key}"]`);
+          if (element) {
+            if (element.type === 'radio') {
+              document.querySelector(`[name="${key}"][value="${value}"]`).checked = true;
+            } else if (element.type === 'checkbox') {
+              element.checked = value === 'on';
+            } else {
+              element.value = value;
+            }
+          }
+        }
+      }
+    }
+    document.getElementById('applicationForm').addEventListener('submit', async function (event) {
+    event.preventDefault(); // Prevent default form submission
+
+    const token = localStorage.getItem('token');
+    if (!token) {
+        alert('You must be logged in to submit the application.');
+        window.location.href = 'index.html';
+        return;
+    }
+
+    // Get form data
+    const formData = new FormData(this);
+    const formObject = Object.fromEntries(formData.entries());
+
+    // Create a PDF document
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    
+
+    
+    // Save the PDF locally
+    const pdfFileName = `${formObject.name || 'Application_Form'}.pdf`;
+    doc.save(pdfFileName);
+
+    // OPTIONAL: Save the PDF as a Blob for backend upload
+    const pdfBlob = doc.output('blob');
+    const uploadFormData = new FormData();
+    uploadFormData.append('file', pdfBlob, pdfFileName);
+
+    // Submit the form with the PDF to the server
+    try {
+        const response = await fetch('/submit-form', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            },
+            body: formData // Note: You can send `uploadFormData` to include the PDF
+        });
+
+        if (response.ok) {
+            alert('Application submitted successfully!');
+            this.reset();
+        } else {
+            const errorText = await response.text();
+            alert(`Error: ${errorText}`);
+        }
+    } catch (error) {
+        console.error('Error submitting form:', error);
+        alert('An error occurred while submitting the form.');
+    }
+});
+
+    
+
+    // Load saved data when the page is loaded
+    document.addEventListener('DOMContentLoaded', loadSavedForm);
+    document.getElementById('applicationForm').addEventListener('submit', async function (e) {
+  e.preventDefault();
+
+  const formData = new FormData(this);
+  const application = Object.fromEntries(formData.entries());
+
+  try {
+    const response = await fetch('/api/applications', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(application),
+    });
+
+    if (response.ok) {
+      alert('Application submitted successfully!');
+      this.reset(); // Clear the form
+    } else {
+      alert('Failed to submit application.');
+    }
+  } catch (err) {
+    console.error(err);
+    alert('Error submitting application.');
+  }
+});
+
+  </script>
+</body>
+</html>
+
+
+  

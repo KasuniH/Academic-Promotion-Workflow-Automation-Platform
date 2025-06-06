@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Login</title>
+<style>
+/* Add your existing CSS styles here */
+
+body {font-family: Arial, Helvetica, sans-serif;}
+/* Modal Styles */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    padding-top: 100px; /* Location of the box */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    max-width: 400px;
+    border-radius: 5px;
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+button {
+    background-color: #5a0c07; 
+    color: white;
+    padding: 10px 20px;
+    margin: 10px 0;
+    border: none;
+    cursor: pointer;
+    width: 100%;
+    border-radius: 4px;
+}
+
+button:hover {
+    opacity: 0.8;
+}
+
+.container {
+    padding: 16px;
+}
+
+input[type=text], input[type=password] {
+    width: 100%;
+    padding: 12px 20px;
+    margin: 8px 0;
+    display: inline-block;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+    border-radius: 4px;
+}
+
+/* Navigation bar styling */
+.navbar {
+  background-color: #7A0000; /* Dark red color */
+  overflow: hidden;
+  padding: 10px 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.navbar img {
+  width: 150px; /* Adjust the size of the logo */
+}
+
+.navbar .login-button {
+  background-color: #4F0F0F; /* Slightly darker button */
+  color: white;
+  padding: 10px 20px;
+  text-align: center;
+  text-decoration: none;
+  border-radius: 5px;
+  margin-right: 20px;
+  transition: background-color 0.3s;
+}
+
+.navbar .login-button:hover {
+  background-color: #660000; /* Hover color for the button */
+}
+.additional-image {
+            display: block;
+            width: 100%;
+            height: calc(100vh - 80px); /* Adjust based on navbar height */
+            object-fit: cover;
+        }
+</style>
+</head>
+<body>
+
+<div class="header">
+    <div class="navbar">
+        <img src="img/uop.png" alt="University Logo">
+        
+        <button onclick="document.getElementById('id01').style.display='block'" style="width:auto;">Login</button>
+      </div>  
+</div>
+<img src="img/pera.jpg" alt="Additional Image" class="additional-image">
+
+<!-- Modal Structure -->
+<div id="id01" class="modal">
+  <form class="modal-content animate" id="loginForm">
+    <div class="imgcontainer">
+      <span onclick="document.getElementById('id01').style.display='none'" class="close" title="Close Modal">&times;</span>
+      <!-- Optional: Add an avatar image here -->
+    </div>
+
+    <div class="container">
+      <label for="email"><b>Username</b></label>
+      <input type="text" placeholder="Enter Username" name="email" id="email" required>
+
+      <label for="password"><b>Password</b></label>
+      <input type="password" placeholder="Enter Password" name="password" id="password" required>
+        
+      <button type="submit">Login</button>
+      <label>
+        <input type="checkbox" checked="checked" name="remember"> Remember me
+      </label>
+    </div>
+
+    <div class="container" style="background-color:#f1f1f1">
+      <button type="button" onclick="document.getElementById('id01').style.display='none'" class="cancelbtn">Cancel</button>
+      <span class="psw">Forgot <a href="#">password?</a></span>
+    </div>
+    <p>Don't have an account? <a href="signup.html">Sign up here</a></p>
+  </form>
+  
+</div>
+
+<script>
+// Get the modal
+var modal = document.getElementById('id01');
+
+// When the user clicks anywhere outside of the modal, close it
+window.onclick = function(event) {
+    if (event.target == modal) {
+        modal.style.display = "none";
+    }
+}
+
+// Handle Login Form Submission
+document.getElementById('loginForm').addEventListener('submit', async function(event) {
+    event.preventDefault(); // Prevent default form submission
+
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+
+    try {
+        const response = await fetch('/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ email, password })
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            const token = data.token;
+            const role = data.role; // Capture the user role
+            // Store the token in localStorage
+            localStorage.setItem('token', token);
+
+            alert('Login successful!');
+            modal.style.display = 'none';
+
+            if (role === 'Applicant') {
+            window.location.href = 'section.html';
+        } else if (role === 'Hod' || role === 'Dean' || role === 'Senate') {
+            window.location.href = 'section2.html';
+        } else {
+            alert('Invalid role');
+        }
+        } else {
+            const error = await response.text();
+            alert(`Login failed: ${error}`);
+        }
+    } catch (error) {
+        console.error('Error during login:', error);
+        alert('An error occurred during login. Please try again.');
+    }
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,265 @@
+<style>
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+    }
+    
+    * {
+      box-sizing: border-box;
+    }
+    
+    input[type=text],
+    select,
+    textarea,
+    input[type=date] {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box;
+      margin-top: 6px;
+      margin-bottom: 16px;
+      resize: vertical;
+    }
+    
+    input[type=submit],
+    button {
+      background-color: #4F0F0F;
+      color: white;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    
+    input[type=submit]:hover,
+    button:hover {
+      background-color: #660000;
+    }
+    
+    .container {
+      border-radius: 5px;
+      background-color: #f2f2f2;
+      padding: 20px;
+    }
+    
+    /* Navigation bar styling */
+    .navbar {
+      background-color: #7A0000; /* Dark red color */
+      overflow: hidden;
+      padding: 10px 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .navbar img {
+      width: 150px; /* Adjust the size of the logo */
+    }
+    
+    .navbar .login-button {
+      background-color: #4F0F0F; /* Slightly darker button */
+      color: white;
+      padding: 10px 20px;
+      text-align: center;
+      text-decoration: none;
+      border-radius: 5px;
+      margin-right: 20px;
+      transition: background-color 0.3s;
+    }
+    
+    .navbar .login-button:hover {
+      background-color: #660000; /* Hover color for the button */
+    }
+    
+    .form-group {
+      margin-bottom: 20px; /* Adjust the space as needed */
+    }
+    
+    table,
+    th,
+    td {
+      border: 1px solid #ccc;
+      border-collapse: collapse;
+    }
+    
+    th,
+    td {
+      padding: 8px;
+      text-align: left;
+    }
+    
+    /* Header background styling */
+    .header-background {
+      background-color: #7A0000; /* Dark red background */
+      color: white;
+      padding: 10px 15px;
+      border-radius: 5px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    </style>
+    
+    <div class="header-background">
+      <h2>Pending Applications for Approval</h2>
+    </div>
+    <div style="margin-bottom: 20px;">
+      <input
+        type="text"
+        id="searchInput"
+        placeholder="Search by Name, Application ID, or Date"
+        onkeyup="filterTable()"
+        style="width: 100%; padding: 10px; border-radius: 5px;"
+      />
+    </div>
+    <table id="applicationsTable">
+      <thead>
+        <tr>
+         <th>Date</th>
+      <th>Applicant ID</th>
+      <th>Applicant Name</th>
+      <th>Application PDF</th>
+      <th>Status</th>
+      <th>Application Status PDF</th>
+      <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Rows will be populated here dynamically -->
+      </tbody>
+    </table>
+    <button onclick="exportToPDF()">Save as PDF</button>
+    <script>
+  const applications = [
+    {
+      date: "2024-12-25",
+      applicantId: "A001",
+      applicantName: "John Doe",
+      pdfLink: "path/to/application1.pdf",
+      status: "Pending",
+      statusPdf: "path/to/status1.pdf",
+    },
+    {
+      date: "2024-12-24",
+      applicantId: "A002",
+      applicantName: "Jane Smith",
+      pdfLink: "path/to/application2.pdf",
+      status: "Under Review",
+      statusPdf: "path/to/status2.pdf",
+    },
+    {
+      date: "2024-12-23",
+      applicantId: "A003",
+      applicantName: "Alice Brown",
+      pdfLink: "path/to/application3.pdf",
+      status: "Approved",
+      statusPdf: "path/to/status3.pdf",
+    },
+  ];
+
+  function populateApplicationsTable() {
+    const tableBody = document.querySelector("#applicationsTable tbody");
+    tableBody.innerHTML = "";
+
+    applications.forEach((application) => {
+      const row = document.createElement("tr");
+
+      // Date Column
+      const dateCell = document.createElement("td");
+      dateCell.textContent = application.date;
+      row.appendChild(dateCell);
+
+      // Applicant ID Column
+      const idCell = document.createElement("td");
+      idCell.textContent = application.applicantId;
+      row.appendChild(idCell);
+
+      // Applicant Name Column
+      const nameCell = document.createElement("td");
+      nameCell.textContent = application.applicantName;
+      row.appendChild(nameCell);
+
+      // Application PDF Column
+      const pdfCell = document.createElement("td");
+      const pdfLink = document.createElement("a");
+      pdfLink.href = application.pdfLink;
+      pdfLink.textContent = "Download PDF";
+      pdfCell.appendChild(pdfLink);
+      row.appendChild(pdfCell);
+
+      // Status Column
+      const statusCell = document.createElement("td");
+      statusCell.textContent = application.status;
+      row.appendChild(statusCell);
+
+      // Application Status PDF Column
+      const statusPdfCell = document.createElement("td");
+      const statusPdfLink = document.createElement("a");
+      statusPdfLink.href = application.statusPdf;
+      statusPdfLink.textContent = "View Status PDF";
+      statusPdfCell.appendChild(statusPdfLink);
+      row.appendChild(statusPdfCell);
+
+      // Action Column
+      const actionCell = document.createElement("td");
+      const approveButton = document.createElement("button");
+      approveButton.textContent = "Approve";
+      approveButton.onclick = () => approveApplication(application.applicantId);
+
+      const rejectButton = document.createElement("button");
+      rejectButton.textContent = "Reject";
+      rejectButton.onclick = () => rejectApplication(application.applicantId);
+
+      actionCell.appendChild(approveButton);
+      actionCell.appendChild(rejectButton);
+      row.appendChild(actionCell);
+
+      tableBody.appendChild(row);
+    });
+  }
+
+  function approveApplication(applicantId) {
+    const app = applications.find((app) => app.applicantId === applicantId);
+    app.status = "Approved";
+    populateApplicationsTable();
+  }
+
+  function rejectApplication(applicantId) {
+    const app = applications.find((app) => app.applicantId === applicantId);
+    app.status = "Rejected";
+    populateApplicationsTable();
+  }
+
+  function filterTable() {
+    const searchInput = document.getElementById("searchInput").value.toLowerCase();
+    const rows = document.querySelectorAll("#applicationsTable tbody tr");
+
+    rows.forEach((row) => {
+      const dateCell = row.cells[0].textContent.toLowerCase();
+      const idCell = row.cells[1].textContent.toLowerCase();
+      const nameCell = row.cells[2].textContent.toLowerCase();
+
+      if (dateCell.includes(searchInput) || idCell.includes(searchInput) || nameCell.includes(searchInput)) {
+        row.style.display = "";
+      } else {
+        row.style.display = "none";
+      }
+    });
+  }
+
+  function exportToPDF() {
+    const doc = new jsPDF();
+    const table = document.getElementById("applicationsTable");
+    const rows = table.querySelectorAll("tbody tr");
+
+    let yOffset = 10;
+    rows.forEach((row) => {
+      const cells = row.querySelectorAll("td");
+      const text = Array.from(cells).map((cell) => cell.textContent);
+      doc.text(text.join(" | "), 10, yOffset);
+      yOffset += 10;
+    });
+
+    doc.save("applications.pdf");
+  }
+document.addEventListener("DOMContentLoaded", populateApplicationsTable);
+</script>
